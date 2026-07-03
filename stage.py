@@ -198,6 +198,20 @@ class Bank:
         return cls.from_image(filename)
 
 
+class _Layer:
+    """Raw-layer proxy: python-ugame exposes ``sprite.layer`` / ``grid.layer`` (the C
+    _stage layer) with a ``.frame(frame, rotation)`` method. Games call it directly
+    (e.g. animation), so mirror it on top of our Sprite/Grid."""
+    def __init__(self, owner):
+        self._o = owner
+
+    def frame(self, frame=0, rotation=0):
+        self._o._layer_frame(frame, rotation)
+
+    def move(self, x, y, z=None):
+        self._o.move(x, y, z)
+
+
 class Grid:
     def __init__(self, bank, width=8, height=8, palette=None, buffer=None):
         self.x = 0
@@ -207,13 +221,27 @@ class Grid:
         self.height = height
         self.bank = bank
         self._tm = pg.Tilemap(bank.bitmap, width, height)
+        self._vals = [[0] * width for _ in range(height)]   # logical tiles (for grid-wide frame/rotation)
+        self.layer = _Layer(self)
 
     def tile(self, x, y, tile=None):
         if not 0 <= x < self.width or not 0 <= y < self.height:
             return 0
         if tile is None:
             return self._tm.tile(x, y)
+        self._vals[y][x] = tile
         self._tm.tile(x, y, tile)
+
+    def _layer_frame(self, frame=0, rotation=0):
+        # grid-wide frame offset + rotation applied to every tile (e.g. the alien wing-flap)
+        fx, fy, tr = _ROT[rotation & 7]
+        for gy in range(self.height):
+            for gx in range(self.width):
+                v = self._vals[gy][gx]
+                if v:
+                    self._tm.tile(gx, gy, v + frame, flip_x=fx, flip_y=fy, transpose=tr)
+                else:
+                    self._tm.tile(gx, gy, 0)
 
     def move(self, x, y, z=None):
         self.x = x
@@ -268,7 +296,11 @@ class Sprite:
         self.px = x
         self.py = y
         self._spr = pg.Sprite(bank.bitmap, int(x) * SCALE, int(y) * SCALE, frame=frame)
+        self.layer = _Layer(self)
         self._apply_rot()
+
+    def _layer_frame(self, frame=0, rotation=0):
+        self.set_frame(frame, rotation)
 
     def _apply_rot(self):
         fx, fy, tr = _ROT[self.rotation & 7]

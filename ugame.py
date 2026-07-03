@@ -32,23 +32,23 @@ class _Buttons:
         b = self._b
         if b is None:
             return 0
-        b.update()
+        b.poll()
         out = 0
-        if b.pressed(b.UP):
+        if b.is_pressed(b.UP):
             out |= K_UP
-        if b.pressed(b.DOWN):
+        if b.is_pressed(b.DOWN):
             out |= K_DOWN
-        if b.pressed(b.LEFT):
+        if b.is_pressed(b.LEFT):
             out |= K_LEFT
-        if b.pressed(b.RIGHT):
+        if b.is_pressed(b.RIGHT):
             out |= K_RIGHT
-        if b.pressed(b.A):
+        if b.is_pressed(b.A):
             out |= K_X            # PicoPad A -> ugame X (primary action)
-        if b.pressed(b.B):
+        if b.is_pressed(b.B):
             out |= K_O            # PicoPad B -> ugame O (secondary)
-        if b.pressed(b.X):
+        if b.is_pressed(b.X):
             out |= K_START
-        if b.pressed(b.Y):
+        if b.is_pressed(b.Y):
             out |= K_SELECT
         return out
 
