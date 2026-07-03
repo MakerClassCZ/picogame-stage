@@ -7,7 +7,7 @@ these modules on the import path instead of the originals. No `_stage` C module 
 is reimplemented on top of the picogame C engine.
 
 **Why bother:** the shim is **fully compatible**, **fullscreen**, and **~2x faster** than the
-original `_stage` on the same game (measured on a PicoPad - see [`benchmark/`](benchmark)).
+original `_stage` on the same game (measured on a PicoPad).
 
 ## Files
 | File | What it is |
@@ -32,7 +32,6 @@ original `_stage` on the same game (measured on a PicoPad - see [`benchmark/`](b
 - `Text` is rendered with the bundled 8x8 bitfont (stage's own glyphs), scaled to match the screen -
   content is faithful; exact glyph shapes differ slightly from the original `_stage` font.
 - `Sprite.rotation` (0..7) maps onto picogame's flip/transpose; the 4 diagonal values use transpose.
-- See [`benchmark/`](benchmark) for the head-to-head `_stage`-vs-shim FPS test.
 
 ## License
 MIT. `stage.py` is a compatibility reimplementation derived from
